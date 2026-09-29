@@ -3,5 +3,4 @@ This Quarto presentation is about Dutch rail travel using reported NS figures fr
 ## Steps to Run
 
 1.  Open this directory as a project in RStudio.
-2.  In the R console run `renv::restore()`.
-3.  Click Render on `Dutch_Trains.qmd`.
+2.  In the R console run `renv::restore()` then click Render on `Dutch_Trains.qmd`.
