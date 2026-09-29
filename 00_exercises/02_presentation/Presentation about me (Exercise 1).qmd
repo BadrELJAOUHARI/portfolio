@@ -1,0 +1,23 @@
+---
+title: "Exercise 1"
+author: 
+    name: Badr El Jaouhari
+    orcid: 0009-0000-6206-5676
+date: "23 September 2026"
+format:
+  revealjs:
+    theme: serif
+editor: visual
+---
+
+## My favorite equation :=)
+
+$$
+i\hbar \frac{\partial}{\partial t} \lvert \Psi \rangle
+=
+\hat{H}\lvert \Psi \rangle
+$$ **Time-dependent Schrödinger equation**
+
+## Something you may not know about me
+
+I did create the first arts club in my previous university. I love doing creative writing in my free time.
