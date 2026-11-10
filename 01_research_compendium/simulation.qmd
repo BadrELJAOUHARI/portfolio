@@ -1,0 +1,123 @@
+---
+title: "Measurement error in linear regression: a simulation replication"
+author: "Badr El Jaouhari"
+format:
+  html:
+    toc: true
+  docx: default
+bibliography: references.bib
+execute:
+  echo: true
+  warning: false
+  message: false
+---
+
+```{r}
+#| label: setup
+#| echo: false
+library(haven)
+library(ggplot2)
+source("scripts/functions.R")
+dir.create("results", showWarnings = FALSE)
+```
+
+## Introduction
+
+We replicate the simulation example in @boulesteix2020. The study investigates how measurement error in glycated haemoglobin (HbA1c), the exposure, and body mass index (BMI), a confounder, changes the estimated association between HbA1c and systolic blood pressure.
+
+## Data
+
+The analysis uses the 2015–2016 NHANES data from the US CDC. We merge five XPT files using the respondent identifier, restrict the data to adults (age 18 or older), and use complete cases for the analysis variables.
+
+```{r}
+#| label: read-data
+dc <- read_nhanes()
+nrow(dc)
+```
+
+The resulting analysis data contain `r nrow(dc)` participants. These are the same five raw data files used by the supplied original script.
+
+## Reference models
+
+The first model adjusts for age and sex. The second also adjusts for BMI. The HbA1c coefficient from the second model is the empirical reference estimate used to evaluate the simulation.
+
+```{r}
+#| label: reference-models
+model_basic <- lm(bp ~ HbA1C + age + as.factor(sex), data = dc)
+model_adjusted <- lm(bp ~ HbA1C + bmi + age + as.factor(sex), data = dc)
+reference <- unname(coef(model_adjusted)["HbA1C"])
+
+reference_models <- data.frame(
+  model = c("Age and sex", "Age, sex and BMI"),
+  estimate = c(coef(model_basic)["HbA1C"], reference),
+  ci_lower = c(confint(model_basic)["HbA1C", 1], confint(model_adjusted)["HbA1C", 1]),
+  ci_upper = c(confint(model_basic)["HbA1C", 2], confint(model_adjusted)["HbA1C", 2])
+)
+knitr::kable(reference_models, digits = 3)
+```
+
+## Simulation design
+
+We retain the original design: classical independent, mean-zero normal errors are added to HbA1c and/or BMI. Each variable has six error-variance fractions (0%, 10%, ..., 50%), yielding 36 scenarios. The variance of added error for a fraction *p* is `var(variable) * p / (1 - p)`. We use 1,000 repetitions, with `set.seed(k)` at repetition *k*, as in the original script.
+
+```{r}
+#| label: simulation
+scenarios <- expand.grid(
+  me_exp = seq(0, 0.5, 0.1),
+  me_conf = seq(0, 0.5, 0.1)
+)
+n_sim <- as.integer(Sys.getenv("N_SIM", "1000"))
+stopifnot(!is.na(n_sim), n_sim >= 1)
+
+sim <- run_simulation(dc, scenarios, n_sim, reference)
+summary_results <- summarise_simulation(sim, scenarios, reference)
+saveRDS(sim, "results/simulation_results.rds")
+write.csv(summary_results, "results/scenario_summary.csv", row.names = FALSE)
+```
+
+## Results
+
+```{r}
+#| label: simulation-figure
+#| fig-cap: "Mean HbA1c coefficient by measurement-error scenario; fill is centred on the reference estimate."
+#| fig-width: 8
+#| fig-height: 6
+fig <- ggplot(summary_results, aes(me_exp_pct, me_conf_pct)) +
+  geom_tile(aes(fill = estimate), colour = "white") +
+  geom_text(aes(label = round(estimate, 2)), size = 3) +
+  scale_fill_gradient2(low = "#D55E00", mid = "white", high = "#56B4E9",
+                       midpoint = reference) +
+  scale_x_continuous(breaks = seq(0, 50, 10)) +
+  scale_y_continuous(breaks = seq(0, 50, 10)) +
+  coord_equal() +
+  labs(x = "Measurement error variance in HbA1c (%)",
+       y = "Measurement error variance in BMI (%)",
+       fill = "Coefficient") +
+  theme_minimal()
+print(fig)
+ggsave("results/simulation_figure.png", fig, width = 8, height = 6, dpi = 160)
+```
+
+The adjusted reference coefficient is `r round(reference, 3)` mmHg per one percentage-point increase in HbA1c. The estimated *bias relative to this empirical reference* is the mean coefficient in each scenario minus that reference value.
+
+```{r}
+#| label: key-results
+key <- subset(summary_results,
+              (me_exp_pct == 0 & me_conf_pct %in% c(0, 50)) |
+              (me_conf_pct == 0 & me_exp_pct == 50) |
+              (me_exp_pct == 50 & me_conf_pct == 50))
+knitr::kable(key, digits = 3)
+```
+
+When only HbA1c is measured with error, its coefficient is generally attenuated toward zero. Error in BMI alone reduces the effectiveness of confounder adjustment, usually increasing the estimated HbA1c coefficient toward the age-and-sex-adjusted estimate. When both have error, the effects can offset one another. This pattern is the main conclusion described by @boulesteix2020.
+
+We additionally report the Monte Carlo standard deviation and the proportion of model-based 95% confidence intervals containing the *empirical reference coefficient*. **This latter rate is not nominal confidence-interval coverage of a known population parameter:** the starting NHANES data are fixed, and the reference coefficient is estimated, not a population truth. It is included only as an exploratory diagnostic.
+
+## Reproducibility
+
+The raw XPT files, original R script, helper functions, and Quarto source are all included. Run `scripts/setup_renv.R` once to initialize the dependency lockfile, then render this document in Quarto. The default is 1,000 repetitions; a quick smoke test can use `N_SIM=10` before rerunning the full study.
+
+## References
+
+::: {#refs}
+:::

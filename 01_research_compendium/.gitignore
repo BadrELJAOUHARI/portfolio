@@ -1,0 +1,9 @@
+.Rhistory
+.RData
+.Rproj.user/
+.quarto/
+*_files/
+renv/library/
+renv/staging/
+*.aux
+*.log
