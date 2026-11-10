@@ -12,11 +12,11 @@ The goal of this project is to explore the Palmer Penguins dataset, which contai
 
 The project contains the penguin dataset, R scripts for data analysis and visualization, and Quarto manuscript files needed to reproduce the results.
 
-Author
+## Author
 
 Badr El Jaouhari
 
-Date of creation
+## Date of creation
 
 04/11/2026
 
