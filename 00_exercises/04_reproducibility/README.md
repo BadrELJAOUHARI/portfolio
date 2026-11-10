@@ -6,12 +6,11 @@
 
 ## Project Description
 
-The goal of this project is to conduct a simulation study investigating the dynamics of the sheep circle of death, a phenomenon in which sheep follow one another in a circular pattern.
-The study aims to explore how this behaviour emerges, which factors influence it, and how we can model it.
+The goal of this project is to explore the Palmer Penguins dataset, which contains measurements of 344 penguins from three species in Antarctica, particularly to visualize the relationship between flipper length and culmen length and examine differences across species.
 
 ## Project Contents
 
-The project contains the code, data, simulation results, and manuscript files needed to reproduce the study.
+The project contains the penguin dataset, R scripts for data analysis and visualization, and Quarto manuscript files needed to reproduce the results.
 
 Author
 
