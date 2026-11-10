@@ -1,0 +1,97 @@
+---
+title: "My Reproducible Manuscript"
+author: "Badr El Jaouhari"
+format: 
+  pdf: default
+bibliography: references.bib
+csl: apa.csl
+---
+
+```{r}
+#| label: library
+#| echo: false
+#| message: false
+#| warning: false
+
+library(ggplot2)
+```
+
+## Meet Quarto
+
+Quarto enables you to weave together content and executable code into a finished document. To learn more about Quarto see [https://quarto.org](https://quarto.org).
+
+## Meet the penguins
+
+The `penguins` data from the [palmerpenguins](https://allisonhorst.github.io/palmerpenguins/) package [@horstPalmerArchipelagoPenguins2022] contains size measurements for 344 penguins from three species observed on three islands in the Palmer Archipelago, Antarctica [@allisonPalmerpenguinsPalmerArchipelago2020].
+
+![](https://allisonhorst.github.io/palmerpenguins/reference/figures/lter_penguins.png)
+
+## Results
+
+```{r}
+#| label: load-data
+#| echo: false
+
+# Read data
+penguins <- read.csv("data/data.csv")
+```
+
+We visualize the relationship between flipper length and culmen length across penguin species.
+
+```{r}
+#| label: penguin-plot
+#| echo: true
+#| warning: false
+#| fig-width: 8
+#| fig-height: 5
+
+# Plot penguins
+ggplot(penguins, 
+       aes(x = `Flipper.Length..mm.`, y = `Culmen.Length..mm.`)) +
+        geom_point(aes(color = Species, shape = Species)) +
+        scale_color_manual(values = c("darkorange","purple","cyan4")) +
+        labs(
+                title = "Flipper and Culmen length",
+                subtitle = "Dimensions for penguins at Palmer Station LTER",
+                x = "Flipper length (mm)", y = "Culmen length (mm)",
+                color = "Penguin species", shape = "Penguin species"
+        ) +
+        theme_minimal()
+```
+
+
+## Descriptive Statistics
+
+25 + 25 = `r 25 + 25`.
+
+Gentoo penguins: `r sum(penguins$Species == "Gentoo", na.rm = TRUE)`.
+
+Chinstrap penguins: `r sum(penguins$Species == "Chinstrap", na.rm = TRUE)`.
+
+Average flipper length: `r round(mean(penguins$Flipper.Length..mm., na.rm = TRUE), 2)` mm.
+
+
+```{r}
+#| label: addition
+#| echo: true
+
+do_addition <- function(number1, number2){
+        
+        # Check that arguments provided are numberic
+        if(class(number1) != "numeric" | class(number2) != "numeric"){
+                print("Error: one or more of your inputs are not numeric")
+                
+        # Perform simple addition and return the result
+        } else{
+                result <- number1 + number2
+                return(result)
+        }
+}
+
+do_addition(67,67)
+```
+
+## References
+
+::: {#refs}
+:::
